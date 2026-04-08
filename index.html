@@ -3,15 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Desafio PhiloMap | O Pesadelo da UX</title>
-
+    <title>PhiloMap | INFERNO DA UX</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap');
 
         :root {
             --bg: #000;
             --text: #fff;
-            --border: #333;
+            --neon: #ff0000;
         }
 
         body { 
@@ -24,135 +23,339 @@
             height: 100vh; 
             margin: 0; 
             overflow: hidden;
+            cursor: none; /* Cursor real oculto */
+        }
+
+        #fake-cursor {
+            width: 30px;
+            height: 30px;
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+            color: yellow;
+            font-size: 2rem;
+            font-weight: bold;
+            transition: 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-shadow: 0 0 10px red;
         }
 
         .chaos-card { 
-            background: #111; 
-            border: 5px solid #ff00ff; 
-            padding: 40px; 
-            border-radius: 20px; 
-            max-width: 450px; 
+            background: #000; 
+            border: 10px ridge #444; 
+            padding: 30px; 
+            max-width: 550px; 
             width: 100%; 
             position: relative; 
-            box-shadow: 0 0 50px #ff00ff;
-            transform: rotate(-2deg);
+            box-shadow: 0 0 200px rgba(255, 0, 0, 0.5);
+            transform: perspective(1000px) rotateX(5deg);
+            transition: transform 0.1s;
         }
 
-        .form-group { margin-bottom: 20px; }
+        .blackout {
+            position: fixed;
+            top:0; left:0; width: 100%; height: 100%;
+            background: black;
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+        }
 
+        @keyframes ultra-glitch {
+            0% { clip: rect(44px, 450px, 56px, 0); }
+            20% { clip: rect(12px, 450px, 100px, 0); }
+            100% { clip: rect(67px, 450px, 120px, 0); }
+        }
+
+        .form-group { position: relative; }
+        
         label { 
             display: block; 
-            font-size: 1.2rem; 
-            color: #00ffff; 
-            text-shadow: 2px 2px #ff00ff; 
-            margin-bottom: 15px; 
-            text-transform: uppercase; 
-            text-align: center; 
-        }
-
-        .chaos-controls { 
-            display: flex; 
-            flex-direction: column; 
-            gap: 20px; 
+            font-size: 1.8rem; 
+            color: #ff00ff; 
+            text-align: center;
+            margin-bottom: 30px;
+            letter-spacing: -2px;
+            animation: ultra-glitch 0.2s infinite;
         }
 
         .chaos-item { 
             display: flex; 
             align-items: center; 
-            gap: 15px; 
-            color: #ffff00; 
+            gap: 20px; 
+            color: #00ff00;
+            margin: 20px 0;
         }
 
+        /* Slider Vertical e Invertido */
         input[type="range"] { 
-            width: 100%; 
+            appearance: slider-vertical;
+            width: 30px;
+            height: 150px;
+            filter: invert(1) hue-rotate(90deg);
+        }
+
+        .btn-chaos { 
+            background: #0000ff; 
+            color: white; 
+            border: 5px solid yellow;
+            padding: 15px;
+            font-weight: 900;
+            cursor: pointer;
+            position: relative;
         }
 
         .btn-chaos-move { 
-            position: relative; 
-            background: #ff4444; 
+            background: #ff0000; 
             color: #fff; 
-            border: 3px solid #fff; 
-            padding: 12px 20px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            margin-top: 20px;
+            border: 2px solid #000; 
+            padding: 20px; 
+            font-size: 1.2rem; 
+            font-weight: bold;
+            box-shadow: -10px -10px 0 #fff;
         }
 
+        .btn-chaos-move.tired {
+            background: white !important;
+            color: black !important;
+            transform: scale(0.2);
+            animation: spin 0.1s infinite;
+        }
+
+        @keyframes spin { to { transform: scale(0.2) rotate(360deg); } }
+
         .final-display { 
-            margin-top: 20px; 
-            padding: 15px; 
-            background: #000; 
-            font-family: monospace; 
-            text-align: center; 
-            border: 2px dashed #00ffff;
-            color: #00ffff;
+            background: #330000; 
+            padding: 20px; 
+            border: 5px solid #ff0000;
+            font-family: 'Courier New', monospace; 
+            font-size: 1.5rem; 
+            text-align: center;
+            margin-top: 20px;
         }
 
         .btn-save { 
-            background: #ffff00; 
+            background: #fff; 
             color: #000; 
-            border: none; 
-            padding: 15px; 
+            padding: 25px; 
             width: 100%; 
-            font-weight: bold; 
-            margin-top: 20px;
+            font-size: 2rem;
             cursor: pointer;
+            border: 10px solid #f0f;
         }
 
+        #maintenance-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: blue;
+            color: white;
+            z-index: 10001;
+            display: none;
+            padding: 50px;
+            font-family: monospace;
+        }
     </style>
 </head>
 <body>
 
-<div class="chaos-card">
-    <div class="form-group">
-        <label>Configurações do Caos</label>
-
-        <div class="chaos-controls">
-            <div class="chaos-item">
-                <span>Confusão:</span>
-                <input type="range" min="0" max="100">
-            </div>
-
-            <div class="chaos-item">
-                <span>Desordem:</span>
-                <input type="range" min="0" max="100">
-            </div>
-
-            <div class="chaos-item">
-                <span>Bug:</span>
-                <input type="range" min="0" max="100">
-            </div>
-        </div>
-
-        <button class="btn-chaos-move" onclick="fugir(this)">
-            Clique se conseguir 😈
-        </button>
-
-        <div class="final-display" id="resultado">
-            Ajuste os níveis de caos...
-        </div>
-
-        <button class="btn-save" onclick="salvar()">
-            SALVAR (boa sorte)
-        </button>
+    <div id="fake-cursor">?</div>
+    <div id="blackout-screen" class="blackout">CONEXÃO PERDIDA...</div>
+    <div id="maintenance-overlay">
+        :( <br><br>
+        Ocorreu um erro crítico no PhiloMap.<br>
+        Estamos coletando informações de erro e depois reiniciaremos para você.<br><br>
+        0% completo...
     </div>
-</div>
 
-<script>
-    function fugir(btn) {
-        const x = Math.random() * (window.innerWidth - btn.offsetWidth);
-        const y = Math.random() * (window.innerHeight - btn.offsetHeight);
+    <div class="chaos-card" id="card">
+        <div class="form-group">
+            <label>NUNCA VAI CONSEGUIR</label>
+            
+            <div style="display: flex; justify-content: space-around; align-items: center;">
+                <div class="chaos-item" style="flex-direction: column;">
+                    <span>DIA:</span>
+                    <input type="range" id="chaos-day" min="1" max="31" value="31">
+                </div>
 
-        btn.style.position = "absolute";
-        btn.style.left = x + "px";
-        btn.style.top = y + "px";
-    }
+                <div class="chaos-item" style="flex-direction: column;">
+                    <span>MÊS:</span>
+                    <button type="button" id="chaos-month-btn" class="btn-chaos">JAN</button>
+                    <div id="month-status" style="font-size: 0.6rem; color: red;">CAPTURA EM CURSO...</div>
+                </div>
+            </div>
 
-    function salvar() {
-        document.getElementById("resultado").innerText =
-            "Parabéns! Você sobreviveu ao pior UX possível 😈";
-    }
-</script>
+            <div class="chaos-item" style="flex-direction: column; text-align: center;">
+                <span>ANO (META: 100 HUMILHAÇÕES):</span>
+                <span id="chaos-year-display" style="font-size: 4rem; color: #ff00ff; text-shadow: 5px 5px #000;">2026</span>
+                <button type="button" id="chaos-year-btn" class="btn-chaos-move">TENTA A SORTE</button>
+            </div>
+            
+            <div style="text-align: center; margin: 10px;">
+                <span id="attempts-text" style="color: yellow; font-size: 1.2rem;">0</span>
+            </div>
+            
+            <div class="final-display">
+                <span id="selected-date">31/JAN/2026</span>
+            </div>
+            
+            <button id="btn-save" class="btn-save" onclick="iniciarSalvamento()">CONFIRMAR DESTINO</button>
+        </div>
+    </div>
 
+    <script src="db.js"></script>
+    <script>
+        let dia = 31; let mesIdx = 0; let ano = 2026; let tentativas = 0;
+        let isTired = false;
+        let isSpinning = false;
+        let spinInterval;
+        const TARGET = 100;
+
+        const meses = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"];
+        const fakeCursor = document.getElementById('fake-cursor');
+        const card = document.getElementById('card');
+        const monthBtn = document.getElementById('chaos-month-btn');
+        const yearBtn = document.getElementById('chaos-year-btn');
+        const yearDisplay = document.getElementById('chaos-year-display');
+        const blackout = document.getElementById('blackout-screen');
+        const maintenance = document.getElementById('maintenance-overlay');
+
+        // Cursor Fantasma
+        window.onmousemove = (e) => {
+            fakeCursor.style.left = e.clientX + 'px';
+            fakeCursor.style.top = e.clientY + 'px';
+            
+            // Inclina o card conforme o mouse
+            const x = (window.innerWidth / 2 - e.clientX) / 20;
+            const y = (window.innerHeight / 2 - e.clientY) / 20;
+            card.style.transform = `perspective(1000px) rotateY(${x}deg) rotateX(${y}deg)`;
+        };
+
+        // Mecânica do Mês: Foge ao se aproximar (não precisa clicar)
+        monthBtn.onmousemove = function() {
+            const rect = card.getBoundingClientRect();
+            this.style.position = 'absolute';
+            this.style.left = Math.random() * (rect.width - 100) + 'px';
+            this.style.top = Math.random() * (rect.height - 100) + 'px';
+            document.getElementById('month-status').innerText = "STATUS: FORA DE ALCANCE";
+        };
+
+        monthBtn.onclick = function() {
+            mesIdx = (mesIdx + 1) % 12;
+            this.innerText = meses[mesIdx];
+            update();
+        };
+
+        // Mecânica do Dia: Invertido
+        document.getElementById('chaos-day').oninput = function() {
+            dia = 32 - this.value; // Inverte o valor
+            update();
+            if(Math.random() > 0.9) this.value = Math.random() * 31;
+        };
+
+        // Mecânica do Ano: 100 humilhações
+        yearBtn.onmouseover = function() {
+            if (isTired || isSpinning) return;
+            tentativas++;
+            document.getElementById('attempts-text').innerText = `${tentativas} / ${TARGET}`;
+            
+            if (tentativas >= TARGET) {
+                becomeTired();
+                return;
+            }
+
+            const rect = card.getBoundingClientRect();
+            this.style.position = 'absolute';
+            this.style.left = Math.random() * (rect.width - 150) + 'px';
+            this.style.top = Math.random() * (rect.height - 150) + 'px';
+        };
+
+        function becomeTired() {
+            isTired = true;
+            yearBtn.classList.add('tired');
+            yearBtn.innerText = "!!!";
+            setTimeout(() => {
+                if(!isSpinning) {
+                    isTired = false;
+                    yearBtn.classList.remove('tired');
+                    yearBtn.innerText = "TENTA A SORTE";
+                    tentativas = 0;
+                    document.getElementById('attempts-text').innerText = `0 / ${TARGET}`;
+                }
+            }, 500); // Só 500ms para clicar!
+        }
+
+        yearBtn.onclick = function() {
+            if (!isTired && !isSpinning) return;
+            if (!isSpinning) {
+                isSpinning = true;
+                isTired = false;
+                yearBtn.classList.remove('tired');
+                yearBtn.innerText = "STOP";
+                spinInterval = setInterval(() => {
+                    ano -= Math.floor(Math.random() * 5);
+                    if (ano < 1900) ano = 2026;
+                    yearDisplay.innerText = ano;
+                    update();
+                }, 30);
+            } else {
+                clearInterval(spinInterval);
+                // Deslize final cruel
+                let extra = Math.floor(Math.random() * 20);
+                ano -= extra;
+                yearDisplay.innerText = ano;
+                isSpinning = false;
+                yearBtn.innerText = "DENOVO?";
+                yearBtn.style.position = 'static';
+                update();
+            }
+        };
+
+        function update() {
+            const d = String(dia).padStart(2, '0');
+            document.getElementById('selected-date').innerText = `${d}/${meses[mesIdx]}/${ano}`;
+        }
+
+        // Sistema de Salvamento Cruel
+        async function iniciarSalvamento() {
+            if (confirm("VOCÊ TEM CERTEZA?")) {
+                if (confirm("CERTEZA ABSOLUTA? ISSO NÃO TEM VOLTA.")) {
+                    if (confirm("ÚLTIMA CHANCE: CLIQUE EM CANCELAR PARA SALVAR. 'OK' VAI RESETAR TUDO.")) {
+                        alert("VOCÊ CLICOU EM OK. REINICIANDO...");
+                        location.reload();
+                    } else {
+                        realmenteSalvar();
+                    }
+                }
+            }
+        }
+
+        async function realmenteSalvar() {
+            const dataObjeto = {
+                tipo: "Sobrevivente do Inferno",
+                data: `${ano}-${mesIdx + 1}-${dia}`,
+                pericia: "Deus da Paciência"
+            };
+            try {
+                await adicionarItem(dataObjeto);
+                alert("COMO? Você é um deus entre os homens. Salvo.");
+                location.reload();
+            } catch(e) { alert("O banco de dados se recusou a aceitar sua vitória."); }
+        }
+
+        // Blecautes e Erros Aleatórios
+        setInterval(() => {
+            blackout.style.display = 'flex';
+            setTimeout(() => blackout.style.display = 'none', 800);
+        }, 12000);
+
+        setInterval(() => {
+            if(Math.random() > 0.98) {
+                maintenance.style.display = 'block';
+                setTimeout(() => maintenance.style.display = 'none', 3000);
+            }
+        }, 5000);
+    </script>
 </body>
 </html>
